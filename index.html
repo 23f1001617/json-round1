@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Rates</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #toggle-theme {
+            margin-bottom: 20px;
+        }
+        .dark {
+            background-color: #333;
+            color: #f4f4f4;
+        }
+        .dark th {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="toggle-theme">Toggle Theme</button>
+    <h1>Currency Rates</h1>
+    <div id="currency-table-container">
+        <table id="currency-table">
+            <thead>
+                <tr>
+                    <th>Currency</th>
+                    <th>Rate</th>
+                </tr>
+            </thead>
+            <tbody id="currency-table-body">
+                <tr>
+                    <td colspan="2">Loading data...</td>
+                </tr>
+            </tbody>
+        </table>
+        <p id="average-rate"></p>
+    </div>
+
+    <script>
+        async function fetchCurrencyRates() {
+            try {
+                const response = await fetch('./rates.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const rates = await response.json();
+                return rates;
+            } catch (error) {
+                document.getElementById('currency-table-body').innerHTML = '<tr><td colspan="2">Failed to load data.</td></tr>';
+                console.error('Fetch error:', error);
+                return [];
+            }
+        }
+
+        function renderTable(rates) {
+            const tableBody = document.getElementById('currency-table-body');
+            tableBody.innerHTML = '';
+
+            let totalRate = 0;
+            rates.forEach(rate => {
+                const row = document.createElement('tr');
+                const currencyCell = document.createElement('td');
+                const rateCell = document.createElement('td');
+
+                currencyCell.textContent = rate.currency;
+                rateCell.textContent = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(parseFloat(rate.rate));
+                
+                row.appendChild(currencyCell);
+                row.appendChild(rateCell);
+                tableBody.appendChild(row);
+
+                totalRate += parseFloat(rate.rate);
+            });
+
+            const averageRate = totalRate / rates.length;
+            document.getElementById('average-rate').textContent = `Average Rate: ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(averageRate)}`;
+        }
+
+        document.getElementById('toggle-theme').addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+        });
+
+        fetchCurrencyRates().then(renderTable);
+    </script>
+
+    <!-- build-id: 2023-10-01T12:00:00Z -->
+
+        <script>
+        // 🔄 Universal JSON handler
+        async function handleJSON() {
+            try {
+                const res = await fetch('./rates.json');
+                if (!res.ok) throw new Error('No rates.json found, checking products.json');
+                const data = await res.json();
+                let total = 0;
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        for (const key in item) {
+                            const val = parseFloat(item[key]);
+                            if (!isNaN(val)) total += val;
+                        }
+                    });
+                } else {
+                    for (const key in data) {
+                        const val = parseFloat(data[key]);
+                        if (!isNaN(val)) total += val;
+                    }
+                }
+                const el = document.querySelector('#total-sales') || document.querySelector('#total-json');
+                if (el) el.textContent = 'Total (JSON): $' + total.toFixed(2);
+            } catch (e) {
+                console.error('JSON parse failed', e);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', handleJSON);
+        </script>
+        </body>
+</html>
+<!-- build-id: 2025-10-16T12:10:55.561111 -->
